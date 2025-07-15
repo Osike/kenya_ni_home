@@ -8,11 +8,13 @@ import BillOfRightsPage from './pages/BillOfRightsPage';
 import AboutPage from './pages/AboutPage';
 import DisclaimerPage from './pages/DisclaimerPage';
 import LegalAidPage from './pages/LegalAidPage';
+import VideoComponent from './components/VideoComponent';
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
+        <VideoComponent />
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
