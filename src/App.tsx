@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
@@ -8,13 +8,14 @@ import BillOfRightsPage from './pages/BillOfRightsPage';
 import AboutPage from './pages/AboutPage';
 import DisclaimerPage from './pages/DisclaimerPage';
 import LegalAidPage from './pages/LegalAidPage';
-import VideoComponent from './components/VideoComponent';
+// import VideoComponent from './components/VideoComponent';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <VideoComponent />
+      {/* VideoComponent outside the main content wrapper, so it's always in the background */}
+      {/* <VideoComponent /> */}
+      <div className="min-h-screen relative z-10">
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />

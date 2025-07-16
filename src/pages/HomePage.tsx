@@ -16,7 +16,7 @@ const HomePage = () => {
           style={{ filter: 'brightness(0.3)' }}
         >
           <source
-            src="https://videos.pexels.com/video-files/6077284/6077284-hd_1920_1080_30fps.mp4"
+            src="src/assets/video.mp4"
             type="video/mp4"
           />
           {/* Fallback image */}

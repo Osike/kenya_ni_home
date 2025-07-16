@@ -4,9 +4,16 @@ import myVideo from "../assets/video.mp4";
 
 function VideoComponent() {
     return (
-     <div>
-        <video src={myVideo} autoPlay muted loop></video>
+     <div className='video_wrap'>
+        <video 
+         src={myVideo} 
+         autoPlay
+         muted
+         loop
+         className="background_video">
+               
+        </video>
      </div>
-    )  
+    ); 
 }      
 export default VideoComponent;
