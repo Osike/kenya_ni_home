@@ -7,6 +7,11 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
+// Import production middleware
+import { securityMiddleware } from './middleware/security.js';
+import { loggingMiddleware, logger } from './middleware/logging.js';
+import { healthCheck, readinessCheck, livenessCheck } from './middleware/healthCheck.js';
+
 // Import routes
 import chatRoutes from './routes/chatRoutes.js';
 import constitutionRoutes from './routes/constitutionRoutes.js';
@@ -24,36 +29,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'", "https:"],
-      frameSrc: ["'none'"],
-    },
-  },
-}));
+// Apply security middleware
+securityMiddleware(app);
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000) / 1000)
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use(limiter);
+// Apply logging middleware
+loggingMiddleware(app);
 
 // CORS configuration
 app.use(cors({
@@ -70,23 +50,10 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Compression middleware
 app.use(compression());
 
-// Logging middleware
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
-}
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    message: 'SheriaBot API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    version: '1.0.0'
-  });
-});
+// Health check endpoints
+app.get('/health', healthCheck);
+app.get('/ready', readinessCheck);
+app.get('/live', livenessCheck);
 
 // API routes
 app.use('/api/chat', chatRoutes);
@@ -120,9 +87,9 @@ app.use(errorHandler);
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    logger.info(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error('Database connection error:', error.message);
+    logger.error('Database connection error:', error);
     process.exit(1);
   }
 };
@@ -132,33 +99,33 @@ const startServer = async () => {
   await connectDB();
   
   app.listen(PORT, () => {
-    console.log(`🚀 SheriaBot API Server running on port ${PORT}`);
-    console.log(`📚 Environment: ${process.env.NODE_ENV}`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-    console.log(`⚖️  SheriaBot API: http://localhost:${PORT}/api`);
+    logger.info(`🚀 SheriaBot API Server running on port ${PORT}`);
+    logger.info(`📚 Environment: ${process.env.NODE_ENV}`);
+    logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
+    logger.info(`⚖️  SheriaBot API: http://localhost:${PORT}/api`);
   });
 };
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
-  console.log(`Error: ${err.message}`);
+  logger.error('Unhandled Promise Rejection:', err);
   process.exit(1);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.log(`Error: ${err.message}`);
+  logger.error('Uncaught Exception:', err);
   process.exit(1);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
+  logger.info('SIGTERM received. Shutting down gracefully...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received. Shutting down gracefully...');
+  logger.info('SIGINT received. Shutting down gracefully...');
   process.exit(0);
 });
 
