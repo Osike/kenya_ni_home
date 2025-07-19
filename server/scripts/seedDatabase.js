@@ -15,6 +15,7 @@ const constitutionArticles = [
     chapter_number: 1,
     chapter_title: "CHAPTER ONE—SOVEREIGNTY OF THE PEOPLE AND SUPREMACY OF THIS CONSTITUTION",
     title: "Sovereignty of the people",
+    title_sw: "Utawala wa watu",
     full_text: `(1) All sovereign power belongs to the people of Kenya and shall be exercised only in accordance with this Constitution.
 
 (2) The people may exercise their sovereign power either directly or through their democratically elected representatives.
@@ -27,8 +28,22 @@ const constitutionArticles = [
 (4) The sovereign power of the people is exercised at—
   (a) the national level; and
   (b) the county level.`,
+    full_text_sw: `(1) Mamlaka yote ya utawala ni ya watu wa Kenya na itatumiwa tu kulingana na Katiba hii.
+
+(2) Watu wanaweza kutumia mamlaka yao ya utawala moja kwa moja au kupitia wawakilishi wao waliochaguliwa kikademokrasia.
+
+(3) Mamlaka ya utawala chini ya Katiba hii imekabiriwa kwa vyombo vifuatavyo vya Serikali, ambavyo vitafanya kazi zao kulingana na Katiba hii—
+  (a) Bunge na mabunge ya kaunti;
+  (b) utendaji wa kitaifa na miundo ya utendaji katika serikali za kaunti; na
+  (c) Mahakama na mahakama huru.
+
+(4) Mamlaka ya utawala ya watu inatumiwa katika—
+  (a) ngazi ya kitaifa; na
+  (b) ngazi ya kaunti.`,
     keywords: ["sovereignty", "people", "power", "democracy", "constitution"],
+    keywords_sw: ["utawala", "watu", "mamlaka", "demokrasia", "katiba"],
     summary: "Establishes that all sovereign power belongs to the people of Kenya and outlines how this power is exercised through democratic institutions.",
+    summary_sw: "Inaanzisha kwamba mamlaka yote ya utawala ni ya watu wa Kenya na inaelezea jinsi mamlaka hii inavyotumiwa kupitia taasisi za kidemokrasia.",
     is_bill_of_rights_article: false
   },
   {
@@ -36,6 +51,7 @@ const constitutionArticles = [
     chapter_number: 4,
     chapter_title: "CHAPTER FOUR—THE BILL OF RIGHTS",
     title: "Equality and freedom from discrimination",
+    title_sw: "Usawa na uhuru kutoka ubaguzi",
     full_text: `(1) Every person is equal before the law and has the right to equal protection and equal benefit of the law.
 
 (2) Equality includes the full and equal enjoyment of all rights and fundamental freedoms.
@@ -45,12 +61,28 @@ const constitutionArticles = [
 (4) The State shall not discriminate directly or indirectly against any person on any ground, including race, sex, pregnancy, marital status, health status, ethnic or social origin, colour, age, disability, religion, conscience, belief, culture, dress, language or birth.
 
 (5) A person shall not discriminate directly or indirectly against another person on any of the grounds specified or contemplated in clause (4).`,
+    full_text_sw: `(1) Kila mtu ni sawa mbele ya sheria na ana haki ya ulinzi sawa na faida sawa ya sheria.
+
+(2) Usawa ni pamoja na kufurahia kikamilifu na kwa usawa haki zote na uhuru wa kimsingi.
+
+(3) Wanawake na wanaume wana haki ya kupata muamala sawa, ikiwa ni pamoja na haki ya fursa sawa katika nyanja za kisiasa, kiuchumi, kitamaduni na kijamii.
+
+(4) Serikali haitabagua moja kwa moja au kwa njia ya kujificha dhidi ya mtu yeyote kwa sababu yoyote, ikiwa ni pamoja na rangi, jinsia, ujauzito, hali ya ndoa, hali ya afya, asili ya kikabila au kijamii, rangi, umri, ulemavu, dini, dhamiri, imani, utamaduni, mavazi, lugha au kuzaliwa.
+
+(5) Mtu hatakubagua moja kwa moja au kwa njia ya kujificha dhidi ya mtu mwingine kwa sababu zozote zilizobainishwa au kuzingatiwa katika kifungu cha (4).`,
     keywords: ["equality", "discrimination", "gender", "race", "disability", "religion", "rights"],
+    keywords_sw: ["usawa", "ubaguzi", "jinsia", "rangi", "ulemavu", "dini", "haki"],
     summary: "Guarantees equality before the law and prohibits discrimination on various grounds including race, gender, religion, and disability.",
+    summary_sw: "Inahakikisha usawa mbele ya sheria na kukataza ubaguzi kwa sababu mbalimbali ikiwa ni pamoja na rangi, jinsia, dini na ulemavu.",
     practical_examples: [
       "You cannot be denied a job because of your race or gender",
       "Women and men must receive equal pay for equal work",
       "You cannot be discriminated against because of your religion or disability"
+    ],
+    practical_examples_sw: [
+      "Huwezi kukataliwa kazi kwa sababu ya rangi yako au jinsia",
+      "Wanawake na wanaume lazima wapokee malipo sawa kwa kazi sawa",
+      "Huwezi kubaguliwa kwa sababu ya dini yako au ulemavu"
     ],
     is_bill_of_rights_article: true
   },
@@ -235,6 +267,7 @@ const legalAidProviders = [
 const faqs = [
   {
     question: "What should I do if I'm arrested?",
+    question_sw: "Nifanye nini ikiwa nitakamatwa?",
     answer: `If you're arrested, remember your rights under Article 49 of the Constitution:
 
 1. **Remain silent** - You don't have to answer questions
@@ -249,8 +282,23 @@ const faqs = [
 • NLAS Hotline: 0800-720-440
 • Kituo Cha Sheria: 041-2316185
 • Police complaints: IPOA 0800-720-720`,
+    answer_sw: `Ikiwa umekamatwa, kumbuka haki zako chini ya Kifungu cha 49 cha Katiba:
+
+1. **Kaa kimya** - Huna haja ya kujibu maswali
+2. **Uliza kwa nini umekamatwa** - Polisi lazima wakuambie sababu
+3. **Usisaini chochote** usichokielewa
+4. **Omba kuwasiliana na wakili au mtu wa familia**
+5. **Kumbuka maelezo ya afisa** - Nambari ya begi, jina, kituo
+
+**Lazima uletwe mahakamani ndani ya masaa 24.**
+
+**Pata msaada wa haraka:**
+• Simu ya NLAS: 0800-720-440
+• Kituo Cha Sheria: 041-2316185
+• Malalamiko ya polisi: IPOA 0800-720-720`,
     category: "criminal-law",
     keywords: ["arrest", "police", "rights", "silent", "lawyer"],
+    keywords_sw: ["kukamatwa", "polisi", "haki", "kimya", "wakili"],
     related_articles: [49, 50],
     priority: 10
   },
