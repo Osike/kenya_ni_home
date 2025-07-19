@@ -4,7 +4,7 @@ import FAQ from '../models/FAQ.js';
 import LegalAidProvider from '../models/LegalAidProvider.js';
 
 // Main chatbot response generation service
-export const generateChatResponse = async (userMessage, session) => {
+export const generateChatResponse = async (userMessage, session, language = 'en') => {
   try {
     const message = userMessage.toLowerCase().trim();
     
@@ -18,51 +18,51 @@ export const generateChatResponse = async (userMessage, session) => {
     };
 
     // Check for FAQ matches first
-    const faqMatch = await findFAQMatch(message);
+    const faqMatch = await findFAQMatch(message, language);
     if (faqMatch && faqMatch.confidence > 0.7) {
       response.text = faqMatch.answer;
       response.confidence = faqMatch.confidence;
       response.referencedArticles = faqMatch.relatedArticles;
-      response.suggestions = generateSuggestions(faqMatch.category);
+      response.suggestions = generateSuggestions(faqMatch.category, language);
       return response;
     }
 
     // Check for constitution article queries
-    const constitutionMatch = await findConstitutionMatch(message);
+    const constitutionMatch = await findConstitutionMatch(message, language);
     if (constitutionMatch && constitutionMatch.confidence > 0.6) {
       response.text = constitutionMatch.response;
       response.confidence = constitutionMatch.confidence;
       response.referencedArticles = constitutionMatch.articles;
       response.matchedTopics = ['constitution'];
-      response.suggestions = generateConstitutionSuggestions();
+      response.suggestions = generateConstitutionSuggestions(language);
       return response;
     }
 
     // Check for legal topic matches
-    const topicMatch = await findLegalTopicMatch(message);
+    const topicMatch = await findLegalTopicMatch(message, language);
     if (topicMatch && topicMatch.confidence > 0.6) {
       response.text = topicMatch.response;
       response.confidence = topicMatch.confidence;
       response.matchedTopics = [topicMatch.category];
       response.referencedArticles = topicMatch.relatedArticles;
-      response.suggestions = generateTopicSuggestions(topicMatch.category);
+      response.suggestions = generateTopicSuggestions(topicMatch.category, language);
       return response;
     }
 
     // Check for legal aid queries
-    const legalAidMatch = await findLegalAidMatch(message);
+    const legalAidMatch = await findLegalAidMatch(message, language);
     if (legalAidMatch && legalAidMatch.confidence > 0.6) {
       response.text = legalAidMatch.response;
       response.confidence = legalAidMatch.confidence;
       response.matchedTopics = ['legal-aid'];
-      response.suggestions = generateLegalAidSuggestions();
+      response.suggestions = generateLegalAidSuggestions(language);
       return response;
     }
 
     // Default response for unmatched queries
-    response.text = generateDefaultResponse(message);
+    response.text = generateDefaultResponse(message, language);
     response.confidence = 0.3;
-    response.suggestions = generateGeneralSuggestions();
+    response.suggestions = generateGeneralSuggestions(language);
 
     return response;
 
@@ -79,7 +79,7 @@ export const generateChatResponse = async (userMessage, session) => {
 };
 
 // Find FAQ matches
-const findFAQMatch = async (message) => {
+const findFAQMatch = async (message, language = 'en') => {
   try {
     const faqs = await FAQ.find({ is_active: true })
       .populate('related_articles', 'article_number title');
@@ -88,10 +88,18 @@ const findFAQMatch = async (message) => {
     let highestScore = 0;
 
     for (const faq of faqs) {
-      const score = calculateTextSimilarity(message, faq.question.toLowerCase());
+      const questionField = language === 'sw' ? 'question_sw' : 'question';
+      const answerField = language === 'sw' ? 'answer_sw' : 'answer';
+      const keywordsField = language === 'sw' ? 'keywords_sw' : 'keywords';
+      
+      const question = faq[questionField] || faq.question;
+      const answer = faq[answerField] || faq.answer;
+      const keywords = faq[keywordsField] || faq.keywords;
+      
+      const score = calculateTextSimilarity(message, question.toLowerCase());
       
       // Also check keywords
-      const keywordScore = faq.keywords.reduce((acc, keyword) => {
+      const keywordScore = keywords.reduce((acc, keyword) => {
         return message.includes(keyword.toLowerCase()) ? acc + 0.2 : acc;
       }, 0);
 
@@ -100,7 +108,7 @@ const findFAQMatch = async (message) => {
       if (totalScore > highestScore && totalScore > 0.5) {
         highestScore = totalScore;
         bestMatch = {
-          answer: faq.answer,
+          answer: answer,
           confidence: totalScore,
           category: faq.category,
           relatedArticles: faq.related_articles.map(a => a.article_number)
@@ -116,7 +124,7 @@ const findFAQMatch = async (message) => {
 };
 
 // Find constitution article matches
-const findConstitutionMatch = async (message) => {
+const findConstitutionMatch = async (message, language = 'en') => {
   try {
     // Check for specific article number mentions
     const articleNumberMatch = message.match(/article\s+(\d+)/i);
@@ -126,7 +134,7 @@ const findConstitutionMatch = async (message) => {
       
       if (article) {
         return {
-          response: formatArticleResponse(article),
+          response: formatArticleResponse(article, language),
           confidence: 0.9,
           articles: [articleNumber]
         };
@@ -134,24 +142,28 @@ const findConstitutionMatch = async (message) => {
     }
 
     // Check for Bill of Rights queries
-    if (message.includes('bill of rights') || message.includes('human rights') || message.includes('fundamental rights')) {
+    const billOfRightsKeywords = language === 'sw' 
+      ? ['haki za kimsingi', 'haki za binadamu', 'haki za msingi']
+      : ['bill of rights', 'human rights', 'fundamental rights'];
+      
+    if (billOfRightsKeywords.some(keyword => message.includes(keyword))) {
       const billOfRightsArticles = await ConstitutionArticle.findBillOfRightsArticles()
         .limit(5);
       
       return {
-        response: formatBillOfRightsResponse(billOfRightsArticles),
+        response: formatBillOfRightsResponse(billOfRightsArticles, language),
         confidence: 0.8,
         articles: billOfRightsArticles.map(a => a.article_number)
       };
     }
 
     // Search for keyword matches in constitution
-    const searchResults = await ConstitutionArticle.searchArticles(message, { limit: 3 });
+    const searchResults = await ConstitutionArticle.searchArticles(message, { limit: 3, language });
     
     if (searchResults.length > 0) {
       const topResult = searchResults[0];
       return {
-        response: formatArticleResponse(topResult),
+        response: formatArticleResponse(topResult, language),
         confidence: 0.7,
         articles: [topResult.article_number]
       };
@@ -165,7 +177,7 @@ const findConstitutionMatch = async (message) => {
 };
 
 // Find legal topic matches
-const findLegalTopicMatch = async (message) => {
+const findLegalTopicMatch = async (message, language) => {
   try {
     const topics = await LegalTopic.find({ review_status: 'approved' })
       .populate('constitution_articles', 'article_number title');
@@ -207,7 +219,7 @@ const findLegalTopicMatch = async (message) => {
 };
 
 // Find legal aid matches
-const findLegalAidMatch = async (message) => {
+const findLegalAidMatch = async (message, language) => {
   try {
     const legalAidKeywords = [
       'legal aid', 'free lawyer', 'pro bono', 'legal help', 'legal assistance',
@@ -250,44 +262,88 @@ const calculateTextSimilarity = (text1, text2) => {
 };
 
 // Response formatters
-const formatArticleResponse = (article) => {
-  return `**Article ${article.article_number}: ${article.title}**
+const formatArticleResponse = (article, language = 'en') => {
+  const title = language === 'sw' && article.title_sw ? article.title_sw : article.title;
+  const summary = language === 'sw' && article.summary_sw ? article.summary_sw : article.summary;
+  const fullText = language === 'sw' && article.full_text_sw ? article.full_text_sw : article.full_text;
+  
+  const billOfRightsText = language === 'sw' 
+    ? '📜 Kifungu hiki ni sehemu ya Haki za Kimsingi.'
+    : '📜 This article is part of the Bill of Rights.';
+    
+  const moreInfoText = language === 'sw'
+    ? 'Kwa maandishi kamili na taarifa zaidi, unaweza kuvinjari sehemu ya Katiba ya tovuti hii.'
+    : 'For the complete text and more information, you can browse the Constitution section of this website.';
+    
+  const needHelpText = language === 'sw'
+    ? '**Unahitaji msaada wa kisheria?** Wasiliana na:'
+    : '**Need legal help?** Contact:';
 
-${article.summary || article.full_text.substring(0, 500) + '...'}
+  return `**${language === 'sw' ? 'Kifungu' : 'Article'} ${article.article_number}: ${title}**
 
-${article.is_bill_of_rights_article ? '📜 This article is part of the Bill of Rights.' : ''}
+${summary || fullText.substring(0, 500) + '...'}
 
-For the complete text and more information, you can browse the Constitution section of this website.
+${article.is_bill_of_rights_article ? billOfRightsText : ''}
 
-**Need legal help?** Contact:
+${moreInfoText}
+
+${needHelpText}
 • Kituo Cha Sheria Mombasa: 041-2316185
 • NLAS Hotline: 0800-720-440`;
 };
 
-const formatBillOfRightsResponse = (articles) => {
+const formatBillOfRightsResponse = (articles, language = 'en') => {
+  const title = language === 'sw' 
+    ? '**Haki za Kimsingi (Sura ya 4 ya Katiba)**'
+    : '**The Bill of Rights (Chapter 4 of the Constitution)**';
+    
+  const intro = language === 'sw'
+    ? 'Haki za Kimsingi zina haki zako za msingi na uhuru. Hapa kuna baadhi ya vifungu muhimu:'
+    : 'The Bill of Rights contains your fundamental rights and freedoms. Here are some key articles:';
+    
   const articleList = articles.slice(0, 3).map(a => 
-    `• Article ${a.article_number}: ${a.title}`
+    `• ${language === 'sw' ? 'Kifungu' : 'Article'} ${a.article_number}: ${language === 'sw' && a.title_sw ? a.title_sw : a.title}`
   ).join('\n');
 
-  return `**The Bill of Rights (Chapter 4 of the Constitution)**
-
-The Bill of Rights contains your fundamental rights and freedoms. Here are some key articles:
-
-${articleList}
-
-**Your rights include:**
-• Right to life and security
+  const rightsTitle = language === 'sw' ? '**Haki zako ni pamoja na:**' : '**Your rights include:**';
+  const rightsText = language === 'sw' 
+    ? `• Haki ya maisha na usalama
+• Usawa na uhuru kutoka ubaguzi
+• Uhuru wa kujieleza na kukusanyika
+• Haki ya huduma za afya, makazi, na elimu
+• Usikilizaji wa haki na upatikanaji wa haki`
+    : `• Right to life and security
 • Equality and freedom from discrimination  
 • Freedom of expression and assembly
 • Right to healthcare, housing, and education
-• Fair hearing and access to justice
+• Fair hearing and access to justice`;
 
-**If your rights are violated:**
-• Contact KNCHR Coast Office: 041-2230496
+  const violationTitle = language === 'sw' ? '**Ikiwa haki zako zimekiukwa:**' : '**If your rights are violated:**';
+  const violationText = language === 'sw'
+    ? `• Wasiliana na KNCHR Coast Office: 041-2230496
+• Tafuta msaada wa kisheria: Kituo Cha Sheria 041-2316185
+• Wasilisha ombi la kikatiba mahakamani`
+    : `• Contact KNCHR Coast Office: 041-2230496
 • Seek legal aid: Kituo Cha Sheria 041-2316185
-• File a constitutional petition in court
+• File a constitutional petition in court`;
 
-Browse the Bill of Rights section for complete information.`;
+  const browseText = language === 'sw'
+    ? 'Vinjari sehemu ya Haki za Kimsingi kwa taarifa kamili.'
+    : 'Browse the Bill of Rights section for complete information.';
+
+  return `${title}
+
+${intro}
+
+${articleList}
+
+${rightsTitle}
+${rightsText}
+
+${violationTitle}
+${violationText}
+
+${browseText}`;
 };
 
 const formatTopicResponse = (topic) => {
@@ -339,7 +395,36 @@ Visit our Legal Aid Resources page for the complete directory.`;
 };
 
 // Generate default response
-const generateDefaultResponse = (message) => {
+const generateDefaultResponse = (message, language = 'en') => {
+  if (language === 'sw') {
+    const responses = [
+      `Naelewa unauliza kuhusu "${message}". Ingawa ninaweza kutoa taarifa za jumla za kisheria, ningependekeza:
+
+• Kuvinjari sehemu yetu ya Katiba kwa vifungu vinavyohusiana
+• Kuangalia Rasilimali zetu za Msaada wa Kisheria kwa msaada wa kitaalamu
+• Kuwasiliana na NLAS kwa 0800-720-440 kwa msaada wa haraka
+
+**Kumbuka:** Hii ni taarifa ya jumla tu, si ushauri wa kisheria.`,
+
+      `Asante kwa swali lako. Kwa mwongozo maalum wa kisheria kuhusu "${message}", tafadhali:
+
+• Wasiliana na Kituo Cha Sheria Mombasa: 041-2316185
+• Piga simu NLAS Legal Aid Hotline: 0800-720-440  
+• Vinjari sehemu yetu ya Haki za Kimsingi kwa haki zako za msingi
+
+Je, unaweza kuwa maalum zaidi kuhusu swali lako la kisheria?`,
+
+      `Naona unauliza kuhusu "${message}". Hapa ni jinsi ninavyoweza kukusaidia:
+
+• Kutafuta hifadhidata yetu ya Katiba
+• Kutoa taarifa kuhusu haki zako
+• Kukuunganisha na rasilimali za msaada wa kisheria
+
+Kwa ushauri wa kisheria wa kibinafsi, wasiliana na wakili aliyeidhinishwa au shirika la msaada wa kisheria.`
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
   const responses = [
     `I understand you're asking about "${message}". While I can provide general legal information, I'd recommend:
 
@@ -370,7 +455,33 @@ For personalized legal advice, contact a qualified lawyer or legal aid organizat
 };
 
 // Suggestion generators
-const generateSuggestions = (category) => {
+const generateSuggestions = (category, language = 'en') => {
+  if (language === 'sw') {
+    const suggestions = {
+      'constitution': [
+        "Kifungu cha 27 kuhusu usawa ni nini?",
+        "Niambie kuhusu Haki za Kimsingi",
+        "Haki zangu ni zipi ikiwa nitakamatwa?"
+      ],
+      'criminal-law': [
+        "Ninawezaje kuripoti uhalifu?",
+        "Haki zangu ni zipi ninapokamatwa?",
+        "Ninawezaje kupata msaada wa kisheria kwa kesi za jinai?"
+      ],
+      'landlord-tenant': [
+        "Ninaweza kufanya nini kuhusu kufukuzwa kinyume cha sheria?",
+        "Mmiliki wa nyumba anafaa kunipa notisi ya muda gani?",
+        "Wapi ninaweza kuwasilisha mgogoro wa mmiliki-mpangaji?"
+      ],
+      'legal-aid': [
+        "Wapi ninaweza kupata msaada wa bure wa kisheria Mombasa?",
+        "Huduma ya pro-bono ya kisheria ni nini?",
+        "Ninawezaje kuwasiliana na NLAS?"
+      ]
+    };
+    return suggestions[category] || generateGeneralSuggestions(language);
+  }
+  
   const suggestions = {
     'constitution': [
       "What is Article 27 about equality?",
@@ -397,30 +508,70 @@ const generateSuggestions = (category) => {
   return suggestions[category] || generateGeneralSuggestions();
 };
 
-const generateConstitutionSuggestions = () => [
-  "What is the Bill of Rights?",
-  "Tell me about Article 43 on economic rights",
-  "What does Article 50 say about fair hearing?",
-  "How do I file a constitutional petition?"
-];
+const generateConstitutionSuggestions = (language = 'en') => {
+  if (language === 'sw') {
+    return [
+      "Haki za Kimsingi ni nini?",
+      "Niambie kuhusu Kifungu cha 43 kuhusu haki za kiuchumi",
+      "Kifungu cha 50 kinasema nini kuhusu usikilizaji wa haki?",
+      "Ninawezaje kuwasilisha ombi la kikatiba?"
+    ];
+  }
+  return [
+    "What is the Bill of Rights?",
+    "Tell me about Article 43 on economic rights",
+    "What does Article 50 say about fair hearing?",
+    "How do I file a constitutional petition?"
+  ];
+};
 
-const generateTopicSuggestions = (category) => [
-  "Where can I get legal help?",
-  "What are the court procedures?",
-  "How much does legal assistance cost?",
-  "What documents do I need?"
-];
+const generateTopicSuggestions = (category, language = 'en') => {
+  if (language === 'sw') {
+    return [
+      "Wapi ninaweza kupata msaada wa kisheria?",
+      "Taratibu za mahakama ni zipi?",
+      "Msaada wa kisheria unagharamu kiasi gani?",
+      "Ninahitaji hati zipi?"
+    ];
+  }
+  return [
+    "Where can I get legal help?",
+    "What are the court procedures?",
+    "How much does legal assistance cost?",
+    "What documents do I need?"
+  ];
+};
 
-const generateLegalAidSuggestions = () => [
-  "What services does Kituo Cha Sheria offer?",
-  "How do I qualify for free legal aid?",
-  "Where is the nearest legal aid office?",
-  "What is the NLAS hotline number?"
-];
+const generateLegalAidSuggestions = (language = 'en') => {
+  if (language === 'sw') {
+    return [
+      "Kituo Cha Sheria kinatoa huduma zipi?",
+      "Ninawezaje kustahili msaada wa bure wa kisheria?",
+      "Ofisi ya msaada wa kisheria iliyo karibu iko wapi?",
+      "Nambari ya simu ya NLAS ni ipi?"
+    ];
+  }
+  return [
+    "What services does Kituo Cha Sheria offer?",
+    "How do I qualify for free legal aid?",
+    "Where is the nearest legal aid office?",
+    "What is the NLAS hotline number?"
+  ];
+};
 
-const generateGeneralSuggestions = () => [
-  "What are my constitutional rights?",
-  "How do I access legal aid in Mombasa?",
-  "What should I do if arrested?",
-  "How do I file a case in Small Claims Court?"
-];
+const generateGeneralSuggestions = (language = 'en') => {
+  if (language === 'sw') {
+    return [
+      "Haki zangu za kikatiba ni zipi?",
+      "Ninawezaje kupata msaada wa kisheria Mombasa?",
+      "Nifanye nini ikiwa nitakamatwa?",
+      "Ninawezaje kuwasilisha kesi katika Mahakama ya Madai Madogo?"
+    ];
+  }
+  return [
+    "What are my constitutional rights?",
+    "How do I access legal aid in Mombasa?",
+    "What should I do if arrested?",
+    "How do I file a case in Small Claims Court?"
+  ];
+};

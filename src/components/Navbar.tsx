@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Scale, Menu, X } from 'lucide-react';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { t } = useTranslation('navigation');
 
   const navItems = [
-    { path: '/', label: 'Home' },
-    { path: '/chat', label: 'Chat' },
-    { path: '/constitution', label: 'Constitution' },
-    { path: '/bill-of-rights', label: 'Bill of Rights' },
-    { path: '/legal-aid', label: 'Legal Aid' },
-    { path: '/about', label: 'About' },
+    { path: '/', label: t('home') },
+    { path: '/chat', label: t('chat') },
+    { path: '/constitution', label: t('constitution') },
+    { path: '/bill-of-rights', label: t('billOfRights') },
+    { path: '/legal-aid', label: t('legalAid') },
+    { path: '/find-lawyer', label: t('findLawyer') },
+    { path: '/about', label: t('about') },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -30,6 +34,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            <LanguageSwitcher />
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -60,6 +65,9 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+              <div className="px-3 py-2">
+                <LanguageSwitcher />
+              </div>
               {navItems.map((item) => (
                 <Link
                   key={item.path}

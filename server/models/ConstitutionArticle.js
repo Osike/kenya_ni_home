@@ -26,12 +26,25 @@ const constitutionArticleSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  title_sw: {
+    type: String,
+    index: true
+  },
   full_text: {
     type: String,
     required: true,
     index: 'text' // Text index for search functionality
   },
+  full_text_sw: {
+    type: String,
+    index: 'text'
+  },
   keywords: [{
+    type: String,
+    lowercase: true,
+    index: true
+  }],
+  keywords_sw: [{
     type: String,
     lowercase: true,
     index: true
@@ -53,7 +66,14 @@ const constitutionArticleSchema = new mongoose.Schema({
     type: String,
     maxlength: 500
   },
+  summary_sw: {
+    type: String,
+    maxlength: 500
+  },
   practical_examples: [{
+    type: String
+  }],
+  practical_examples_sw: [{
     type: String
   }],
   created_at: {
@@ -93,6 +113,8 @@ constitutionArticleSchema.statics.findBillOfRightsArticles = function() {
 
 // Static method to search articles
 constitutionArticleSchema.statics.searchArticles = function(query, options = {}) {
+  const language = options.language || 'en';
+  
   const searchQuery = {
     $or: [
       { title: { $regex: query, $options: 'i' } },
@@ -101,6 +123,15 @@ constitutionArticleSchema.statics.searchArticles = function(query, options = {})
       { chapter_title: { $regex: query, $options: 'i' } }
     ]
   };
+  
+  // Add Kiswahili search fields if language is Kiswahili
+  if (language === 'sw') {
+    searchQuery.$or.push(
+      { title_sw: { $regex: query, $options: 'i' } },
+      { full_text_sw: { $regex: query, $options: 'i' } },
+      { keywords_sw: { $in: [new RegExp(query, 'i')] } }
+    );
+  }
 
   if (options.billOfRightsOnly) {
     searchQuery.is_bill_of_rights_article = true;

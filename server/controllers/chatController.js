@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 // Send message to chatbot
 export const sendMessage = async (req, res) => {
   try {
-    const { message, sessionId } = req.body;
+    const { message, sessionId, language = 'en' } = req.body;
     const userAgent = req.get('User-Agent');
     const ipAddress = req.ip;
 
@@ -34,7 +34,7 @@ export const sendMessage = async (req, res) => {
 
     // Generate bot response
     const startTime = Date.now();
-    const botResponse = await generateChatResponse(message, session);
+    const botResponse = await generateChatResponse(message, session, language);
     const processingTime = Date.now() - startTime;
 
     // Add bot message with metadata

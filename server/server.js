@@ -18,6 +18,7 @@ import constitutionRoutes from './routes/constitutionRoutes.js';
 import legalAidRoutes from './routes/legalAidRoutes.js';
 import faqRoutes from './routes/faqRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import partnerLawFirmRoutes from './routes/partnerLawFirmRoutes.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -61,6 +62,7 @@ app.use('/api/constitution', constitutionRoutes);
 app.use('/api/legal-aid', legalAidRoutes);
 app.use('/api/faqs', faqRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/lawfirms', partnerLawFirmRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -74,7 +76,8 @@ app.get('/', (req, res) => {
       constitution: '/api/constitution',
       legalAid: '/api/legal-aid',
       faqs: '/api/faqs',
-      analytics: '/api/analytics'
+      analytics: '/api/analytics',
+      lawFirms: '/api/lawfirms'
     }
   });
 });

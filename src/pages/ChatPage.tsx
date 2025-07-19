@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Send, Bot, User, Loader } from 'lucide-react';
 import { mockChatResponse } from '../utils/mockApi';
 
@@ -10,10 +11,11 @@ interface Message {
 }
 
 const ChatPage = () => {
+  const { t, i18n } = useTranslation('chat');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hello! I'm SheriaBot, your legal assistant for Kenya. I can help you understand your rights, navigate legal procedures, and find relevant information from the Constitution. How can I assist you today?",
+      text: t('welcomeMessage'),
       sender: 'bot',
       timestamp: new Date(),
     },
@@ -46,7 +48,7 @@ const ChatPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await mockChatResponse(inputText);
+      const response = await mockChatResponse(inputText, i18n.language);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: response,
@@ -57,7 +59,7 @@ const ChatPage = () => {
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm sorry, I'm having trouble processing your request right now. Please try again later.",
+        text: t('errorMessage'),
         sender: 'bot',
         timestamp: new Date(),
       };
@@ -73,10 +75,10 @@ const ChatPage = () => {
         <div className="bg-white rounded-t-xl shadow-lg p-6 border-b">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center">
             <Bot className="mr-3 h-7 w-7 text-blue-800" />
-            Chat with SheriaBot
+            {t('title')}
           </h1>
           <p className="text-gray-600 mt-2">
-            Ask about your legal rights, Constitution articles, or legal procedures in Kenya.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -129,7 +131,7 @@ const ChatPage = () => {
                 <div className="bg-gray-100 px-4 py-3 rounded-2xl">
                   <div className="flex items-center space-x-2">
                     <Loader className="h-4 w-4 animate-spin text-gray-600" />
-                    <span className="text-gray-600">SheriaBot is thinking...</span>
+                    <span className="text-gray-600">{t('thinking')}</span>
                   </div>
                 </div>
               </div>
@@ -145,7 +147,7 @@ const ChatPage = () => {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Ask about your legal rights, Constitution articles, or legal procedures..."
+              placeholder={t('placeholder')}
               className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={isLoading}
             />

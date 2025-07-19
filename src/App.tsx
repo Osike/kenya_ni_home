@@ -8,6 +8,7 @@ import BillOfRightsPage from './pages/BillOfRightsPage';
 import AboutPage from './pages/AboutPage';
 import DisclaimerPage from './pages/DisclaimerPage';
 import LegalAidPage from './pages/LegalAidPage';
+import FindLawyerPage from './pages/FindLawyerPage';
 // import VideoComponent from './components/VideoComponent';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/disclaimer" element={<DisclaimerPage />} />
           <Route path="/legal-aid" element={<LegalAidPage />} />
+          <Route path="/find-lawyer" element={<FindLawyerPage />} />
         </Routes>
       </div>
     </Router>
