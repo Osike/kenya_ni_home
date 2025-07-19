@@ -1,4 +1,4 @@
-export const mockChatResponse = async (userInput: string): Promise<string> => {
+export const mockChatResponse = async (userInput: string, language: string = 'en'): Promise<string> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
 
@@ -6,6 +6,22 @@ export const mockChatResponse = async (userInput: string): Promise<string> => {
 
   // Constitution-related queries
   if (input.includes('article 27') || input.includes('equality') || input.includes('discrimination')) {
+    if (language === 'sw') {
+      return `Kifungu cha 27 cha Katiba kinahakikisha usawa na uhuru kutoka ubaguzi. Mambo muhimu:
+
+• Kila mtu ni sawa mbele ya sheria
+• Wanawake na wanaume wana haki ya kupata muamala sawa
+• Serikali haiwezi kubagua kwa sababu ya rangi, jinsia, ujauzito, hali ya ndoa, hali ya afya, asili ya kikabila, rangi, umri, ulemavu, dini, au sababu zingine
+• Hii ni pamoja na fursa sawa katika nyanja za kisiasa, kiuchumi, kitamaduni na kijamii
+
+Ikiwa unaamini umebaguliwa, unaweza:
+1. Kuripoti kwa Tume ya Kitaifa ya Haki za Binadamu (KNCHR)
+2. Kutafuta ushauri wa kisheria kutoka mashirika kama Kituo Cha Sheria
+3. Kuwasilisha ombi la kikatiba mahakamani
+
+Je, unahitaji taarifa kuhusu aina maalum za ubaguzi au jinsi ya kuripoti ubaguzi?`;
+    }
+    
     return `Article 27 of the Constitution guarantees equality and freedom from discrimination. Key points:
 
 • Every person is equal before the law
@@ -22,6 +38,29 @@ Would you like information about specific types of discrimination or how to repo
   }
 
   if (input.includes('article 49') || input.includes('arrested') || input.includes('arrest')) {
+    if (language === 'sw') {
+      return `Kifungu cha 49 kinalinda haki za watu waliokamatwa. Unapokamatwa, una haki ya:
+
+• Kukaa kimya
+• Kufahamishwa haraka kwa nini umekamatwa
+• Kutolazimishwa kukiri
+• Kuletwa mahakamani ndani ya masaa 24 (au siku ifuatayo ya mahakama)
+• Kuachiliwa kwa dhamana isipokuwa kuna sababu za lazima za kutokuachiwa
+• Kuwekwa kando na wafungwa waliopatikana na hatia
+
+MUHIMU: Ikiwa umekamatwa:
+1. Tumia haki yako ya kukaa kimya
+2. Omba kuwasiliana na wakili au mtu wa familia
+3. Usisaini chochote usichokielewa
+4. Kumbuka maelezo ya afisa aliyekukamata
+
+Kwa msaada wa haraka wa kisheria:
+- Simu ya NLAS: 0800-720-440
+- Kituo Cha Sheria Mombasa: 041-2316185
+
+Unahitaji taarifa zaidi kuhusu taratibu za kukamatwa?`;
+    }
+    
     return `Article 49 protects the rights of arrested persons. When arrested, you have the right to:
 
 • Remain silent
@@ -45,6 +84,30 @@ Need more specific information about arrest procedures?`;
   }
 
   if (input.includes('bill of rights') || input.includes('human rights')) {
+    if (language === 'sw') {
+      return `Haki za Kimsingi (Sura ya 4 ya Katiba) zina haki zako za msingi na uhuru:
+
+HAKI MUHIMU NI PAMOJA NA:
+• Haki ya maisha (Kifungu cha 26)
+• Usawa na kutobaguliwa (Kifungu cha 27)
+• Heshima ya kibinadamu (Kifungu cha 28)
+• Uhuru na usalama (Kifungu cha 29)
+• Uhuru wa kujieleza (Kifungu cha 33)
+• Haki za kiuchumi na kijamii (Kifungu cha 43)
+• Usikilizaji wa haki (Kifungu cha 50)
+
+Haki hizi zinakingwa na sheria na zinaweza kutetewa mahakamani. Ikiwa haki zako zimekiukwa, unaweza:
+- Kuwasilisha ombi la kikatiba
+- Kutafuta msaada kutoka mashirika ya haki za binadamu
+- Kuripoti kwa KNCHR
+
+Kwa ukiukaji maalum wa haki, wasiliana na:
+- KNCHR Coast Office: 041-2230496
+- Kituo Cha Sheria: 041-2316185
+
+Ni haki gani maalum ungependa kujua zaidi?`;
+    }
+    
     return `The Bill of Rights (Chapter 4 of the Constitution) contains your fundamental rights and freedoms:
 
 KEY RIGHTS INCLUDE:
@@ -70,6 +133,32 @@ Which specific right would you like to learn more about?`;
 
   // Landlord-tenant issues
   if (input.includes('landlord') || input.includes('tenant') || input.includes('eviction') || input.includes('rent')) {
+    if (language === 'sw') {
+      return `Masuala ya mmiliki-mpangaji yanashughulikiwa na Sheria ya Kuzuia Kodi na sheria zingine. Hapa kuna haki zako muhimu:
+
+HAKI ZA MPANGAJI:
+• Haki ya kupewa notisi ya kutosha kabla ya kufukuzwa (kawaida siku 30)
+• Haki ya kutumia mali kwa amani
+• Haki ya kupata huduma muhimu
+• Haki ya faragha (mmiliki hawezi kuingia bila ruhusa)
+• Haki ya kuongezewa kodi kwa kiasi cha busara
+
+MASUALA YA KAWAIDA NA SULUHISHO:
+• Kufukuzwa kinyume cha sheria: Wasiliana na polisi, tafuta msaada wa kisheria
+• Migogoro ya kodi: Mahakama ya Madai Madogo kwa kiasi chini ya 1M KES
+• Hali mbaya ya maisha: Ripoti kwa idara ya afya ya kaunti
+• Migogoro ya amana: Weka stakabadhi, tafuta upatanisho
+
+MSAADA WA KISHERIA:
+- Kituo Cha Sheria: 041-2316185
+- Mahakama ya Madai Madogo: Mahakama za Sheria Mombasa
+- NLAS: 0800-720-440
+
+Muunganiko wa kikatiba: Kifungu cha 43 kinahakikisha haki yako ya makazi ya kutosha!
+
+Unahitaji msaada na suala maalum la mmiliki-mpangaji?`;
+    }
+    
     return `Landlord-tenant issues are governed by the Rent Restriction Act and other laws. Here are your key rights:
 
 TENANT RIGHTS:
@@ -191,6 +280,16 @@ What specific legal issue do you need help with?`;
 
   // Default response for other queries
   const responses = [
+    language === 'sw' ? 
+    `Naelewa unauliza kuhusu "${userInput}". Ingawa ninaweza kutoa taarifa za jumla kuhusu sheria ya Kenya, ningependekeza kuwasiliana na rasilimali hizi kwa mwongozo maalum wa kisheria:
+
+• Kituo Cha Sheria Mombasa: 041-2316185
+• Simu ya Msaada wa NLAS: 0800-720-440
+• KNCHR Coast Office: 041-2230496
+
+Unaweza pia kuvinjari sehemu za Katiba au Haki za Kimsingi kwenye tovuti hii kwa vifungu vinavyohusiana.
+
+Je, unaweza kuwa maalum zaidi kuhusu swali lako la kisheria?` :
     `I understand you're asking about "${userInput}". While I can provide general information about Kenyan law, I'd recommend contacting these resources for specific legal guidance:
 
 • Kituo Cha Sheria Mombasa: 041-2316185
@@ -201,6 +300,14 @@ You can also browse the Constitution or Bill of Rights sections on this website 
 
 Could you be more specific about your legal question?`,
 
+    language === 'sw' ?
+    `Asante kwa swali lako. Kwa mwongozo maalum wa kisheria kuhusu "${userInput}", tafadhali:
+
+• Wasiliana na Kituo Cha Sheria Mombasa: 041-2316185
+• Piga simu NLAS Legal Aid Hotline: 0800-720-440  
+• Vinjari sehemu yetu ya Haki za Kimsingi kwa haki zako za msingi
+
+Je, unaweza kuwa maalum zaidi kuhusu swali lako la kisheria?` :
     `Thank you for your question about "${userInput}". For the most accurate legal guidance, I recommend:
 
 1. Consulting the Constitution (available on this website)
@@ -211,6 +318,16 @@ If this relates to your constitutional rights, check our Bill of Rights section.
 
 Is there a specific aspect of this issue you'd like me to help clarify?`,
 
+    language === 'sw' ?
+    `Naona unauliza kuhusu "${userInput}". Hapa ni jinsi ninavyoweza kukusaidia:
+
+• Kutafuta hifadhidata yetu ya Katiba
+• Kutoa taarifa kuhusu haki zako
+• Kukuunganisha na rasilimali za msaada wa kisheria
+
+Kwa ushauri wa kisheria wa kibinafsi, wasiliana na wakili aliyeidhinishwa au shirika la msaada wa kisheria.
+
+Ni eneo gani maalum la kisheria ungependa kujua zaidi?` :
     `I see you're asking about "${userInput}". While I can provide general legal information, for specific situations you should:
 
 • Contact Kituo Cha Sheria for free legal aid
